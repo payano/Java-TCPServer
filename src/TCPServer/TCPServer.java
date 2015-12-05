@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Created by johan on 2015-12-05.
@@ -27,11 +28,17 @@ public class TCPServer {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             System.out.println("GOT A CONNECTION FROM: " + socket.getRemoteSocketAddress().toString());
-            while(socket.isConnected()){
-                clientData = bufferedReader.readLine();
-                System.out.println("GOT: " + clientData);
-                outputStream.writeBytes("OK\n\r");
+            while(!socket.isClosed()){
+                try {
+                    clientData = bufferedReader.readLine();
+                    System.out.println("GOT: " + clientData);
+                    outputStream.writeBytes("OK\n\r");
+                }catch (SocketException e){
+                    socket.close();
+                }
             }
+            socket.close();
+            System.out.println("GOT A DISCONNECT...");
 
         }
     }
